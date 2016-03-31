@@ -7,8 +7,13 @@
 </head>
 <body>
 <h1>Binary Loyalty</h1>
-<form method="post">
-    <input type="submit" id="submit" value="Start New Game"/>
+<form method="post" action="/startGame">
+    <input type="submit" id="start_game_submit" value="Start New Game"/>
+</form>
+<form method="post" action="/joinGame" th:object="${game_code_form}">
+    Enter a Game Code to Join
+    <input type="text" id="enter_game_code" th:field="*{code}"/>
+    <input type="submit" id="join_game_submit" value="Join Game"/>
 </form>
 </body>
 </html>

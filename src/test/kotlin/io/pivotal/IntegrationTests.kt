@@ -14,9 +14,22 @@ import kotlin.test.*;
 class IntegrationTests {
 
     @Test
-    fun whenStartGameIsClicked_userSeesAGameCode() {
+    fun whenStartGameIsClicked_userSeesAGameCodeAndOnePlayer() {
         open("/")
-        `$`("#submit").click()
+        `$`("#start_game_submit").click()
         assertNotEquals(`$`("#game_code").text(),"")
+        assertEquals(`$`("#num_players").text(),"1")
+    }
+
+    @Test
+    fun whenExistingGameCodeIsJoined_userSeesNumberOfPlayers() {
+        open("/")
+        `$`("#start_game_submit").click()
+        var gameCode = `$`("#game_code").text()
+        open("/")
+        `$`("#enter_game_code").value = gameCode
+        `$`("#join_game_submit").click()
+        assertEquals(`$`("#game_code").text(),gameCode)
+        assertEquals(`$`("#num_players").text(),"2")
     }
 }
