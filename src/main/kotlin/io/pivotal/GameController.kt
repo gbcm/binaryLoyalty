@@ -16,32 +16,50 @@ class GameController {
 
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(model : Model) : String {
-        var gc = GameCode()
-        model.addAttribute("game_code_form", gc)
+        model.addAttribute("game_code_form", GameCode())
         return "landing"
     }
 
     @RequestMapping(value = "/startGame", method = arrayOf(RequestMethod.POST))
     fun startGame(model : Model) : String {
         var gameCode = generateGameCode()
-        model.addAttribute("game_code", gameCode)
         model.addAttribute("num_players", 1)
         gamesMap.put(gameCode,1)
+
+        var ui = UserInfo()
+        ui.gameCode = gameCode
+        ui.userName = "System"
+        model.addAttribute("user_info", ui)
+
         return "lobby"
     }
 
     @RequestMapping(value = "/joinGame", method = arrayOf(RequestMethod.POST))
     fun joinGame(model : Model, @ModelAttribute("game_code_form") gameCode : GameCode ) : String {
         var numPlayers = gamesMap.get(gameCode.code)
-        if (numPlayers == null) {
-            return "landing"
-        } else {
-            gamesMap[gameCode.code] = numPlayers + 1
-            model.addAttribute("game_code", gameCode.code)
-            model.addAttribute("num_players", numPlayers + 1)
+        if (numPlayers != null) {
+            var ui = UserInfo()
+            ui.gameCode = gameCode.code
+            model.addAttribute("user_info_form", ui)
+            return "userInfo"
         }
-        return "lobby"
+        model.addAttribute("game_code_form", GameCode())
+        return "landing"
     }
+
+    @RequestMapping(value = "/userInfo", method = arrayOf(RequestMethod.POST))
+    fun enterUserInfo(model : Model, @ModelAttribute("user_info_form") userInfo : UserInfo ) : String {
+        var numPlayers = gamesMap.get(userInfo.gameCode)
+        if (numPlayers != null) {
+            gamesMap[userInfo.gameCode] = numPlayers + 1
+            model.addAttribute("num_players", numPlayers + 1)
+            model.addAttribute("user_info", userInfo)
+            return "lobby"
+        }
+        model.addAttribute("game_code_form", GameCode())
+        return "landing"
+    }
+
 
     fun generateGameCode() : String {
         val rand = Random()
@@ -57,3 +75,10 @@ class GameCode {
     var code: String = ""
     init {}
 }
+
+class UserInfo {
+    var gameCode = ""
+    var userName = ""
+    init {}
+}
+

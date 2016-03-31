@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>User Info</title>
+</head>
+<body>
+You are joining game: <span id="game_code_title" th:text="${game_code}">!</span>
+Enter your User Name
+<form method="post" action="/userInfo" th:object="${user_info_form}">
+    <input type="hidden" id="game_code_hidden_input" th:field="*{gameCode}" th:value="*{gameCode}"/>
+    <input type="text" id="enter_user_name" th:field="*{userName}"/>
+    <input type="submit" id="user_info_submit" value="Submit"/>
+</form>
+</body>
+</html>
