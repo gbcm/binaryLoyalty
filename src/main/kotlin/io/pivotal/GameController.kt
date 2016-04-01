@@ -12,7 +12,7 @@ class GameController {
 
     val ALPHA_NUM = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     val GAME_CODE_LEN = 4
-    val gamesMap = hashMapOf<String, Int>()
+    val gamesMap = hashMapOf<String, MutableList<UserInfo>>()
 
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(model : Model) : String {
@@ -24,11 +24,12 @@ class GameController {
     fun startGame(model : Model) : String {
         var gameCode = generateGameCode()
         model.addAttribute("num_players", 1)
-        gamesMap.put(gameCode,1)
 
         var ui = UserInfo()
         ui.gameCode = gameCode
         ui.userName = "System"
+
+        gamesMap.put(gameCode, mutableListOf(ui))
         model.addAttribute("user_info", ui)
 
         return "lobby"
@@ -36,10 +37,11 @@ class GameController {
 
     @RequestMapping(value = "/joinGame", method = arrayOf(RequestMethod.POST))
     fun joinGame(model : Model, @ModelAttribute("game_code_form") gameCode : GameCode ) : String {
-        var numPlayers = gamesMap.get(gameCode.code)
-        if (numPlayers != null) {
+        val players = gamesMap[gameCode.code]
+        if (players != null) {
             var ui = UserInfo()
             ui.gameCode = gameCode.code
+            players.add(ui)
             model.addAttribute("user_info_form", ui)
             return "userInfo"
         }
@@ -49,17 +51,15 @@ class GameController {
 
     @RequestMapping(value = "/userInfo", method = arrayOf(RequestMethod.POST))
     fun enterUserInfo(model : Model, @ModelAttribute("user_info_form") userInfo : UserInfo ) : String {
-        var numPlayers = gamesMap.get(userInfo.gameCode)
-        if (numPlayers != null) {
-            gamesMap[userInfo.gameCode] = numPlayers + 1
-            model.addAttribute("num_players", numPlayers + 1)
+        val players = gamesMap[userInfo.gameCode]
+        if (players != null) {
+            model.addAttribute("num_players", players.size)
             model.addAttribute("user_info", userInfo)
             return "lobby"
         }
         model.addAttribute("game_code_form", GameCode())
         return "landing"
     }
-
 
     fun generateGameCode() : String {
         val rand = Random()
