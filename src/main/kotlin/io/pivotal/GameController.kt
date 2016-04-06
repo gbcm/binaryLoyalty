@@ -29,8 +29,10 @@ class GameController {
         ui.gameCode = gameCode
         ui.userName = "System"
 
-        gamesMap.put(gameCode, mutableListOf(ui))
+        var players = mutableListOf(ui)
+        gamesMap.put(gameCode, players)
         model.addAttribute("user_info", ui)
+        model.addAttribute("players", players)
 
         return "lobby"
     }
@@ -41,8 +43,8 @@ class GameController {
         if (players != null) {
             var ui = UserInfo()
             ui.gameCode = gameCode.code
-            players.add(ui)
             model.addAttribute("user_info_form", ui)
+            model.addAttribute("players", players)
             return "userInfo"
         }
         model.addAttribute("game_code_form", GameCode())
@@ -53,8 +55,9 @@ class GameController {
     fun enterUserInfo(model : Model, @ModelAttribute("user_info_form") userInfo : UserInfo ) : String {
         val players = gamesMap[userInfo.gameCode]
         if (players != null) {
-            model.addAttribute("num_players", players.size)
+            players.add(userInfo)
             model.addAttribute("user_info", userInfo)
+            model.addAttribute("players", players)
             return "lobby"
         }
         model.addAttribute("game_code_form", GameCode())

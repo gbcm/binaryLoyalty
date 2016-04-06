@@ -9,6 +9,11 @@
 Welcome  <span id="user_name" th:text="${user_info.userName}">!</span>
 <p>Your Game Code is:</p>
 <p id="game_code" th:text="${user_info.gameCode}">!</p>
-There are <span id="num_players" th:text="${num_players}">!</span> players
+
+Current players:
+<ul th:each="player : ${players}">
+    <li th:text="${player.userName}"></li>
+</ul>
+
 </body>
 </html>

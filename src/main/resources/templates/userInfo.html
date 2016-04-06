@@ -7,6 +7,14 @@
 </head>
 <body>
 You are joining game: <span id="game_code_title" th:text="${game_code}">!</span>
+
+<p th:if="${players.size() > 0}">
+    Current players:
+    <ul th:each="player : ${players}">
+        <li th:text="${player.userName}"></li>
+    </ul>
+</p>
+
 Enter your User Name
 <form method="post" action="/userInfo" th:object="${user_info_form}">
     <input type="hidden" id="game_code_hidden_input" th:field="*{gameCode}" th:value="*{gameCode}"/>
