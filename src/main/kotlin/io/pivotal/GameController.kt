@@ -1,87 +1,65 @@
 package io.pivotal
 
+import io.pivotal.form.GameCodeForm
+import io.pivotal.form.UserInfoForm
+import io.pivotal.model.Game
+import io.pivotal.model.GameRepository
+import io.pivotal.model.UserInfo
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
-import java.util.*
 
 @Controller
-class GameController {
-
-    val ALPHA_NUM = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    val GAME_CODE_LEN = 4
-    val gamesMap = hashMapOf<String, MutableList<UserInfo>>()
+class GameController @Autowired constructor(val gameRepository: GameRepository) {
 
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(model : Model) : String {
-        model.addAttribute("game_code_form", GameCode())
+        model.addAttribute("game_code_form", GameCodeForm())
         return "landing"
     }
 
-    @RequestMapping(value = "/startGame", method = arrayOf(RequestMethod.POST))
-    fun startGame(model : Model) : String {
-        var gameCode = generateGameCode()
+    @RequestMapping(value = "/createGame", method = arrayOf(RequestMethod.POST))
+    fun createGame(model : Model) : String {
         model.addAttribute("num_players", 1)
 
-        var ui = UserInfo()
-        ui.gameCode = gameCode
-        ui.userName = "System"
-
-        var players = mutableListOf(ui)
-        gamesMap.put(gameCode, players)
-        model.addAttribute("user_info", ui)
-        model.addAttribute("players", players)
+        var game = Game()
+        gameRepository.save(game)
+        model.addAttribute("user_info", game.players.get(0))
+        model.addAttribute("game", game)
 
         return "lobby"
     }
 
     @RequestMapping(value = "/joinGame", method = arrayOf(RequestMethod.POST))
-    fun joinGame(model : Model, @ModelAttribute("game_code_form") gameCode : GameCode ) : String {
-        val players = gamesMap[gameCode.code]
-        if (players != null) {
-            var ui = UserInfo()
-            ui.gameCode = gameCode.code
+    fun joinGame(model : Model, @ModelAttribute("game_code_form") gameCodeForm : GameCodeForm ) : String {
+        val game = gameRepository.fetchGame(gameCodeForm.gameCode)
+        if (game != null) {
+            var ui = UserInfoForm()
+            ui.gameCode = game.gameCode
             model.addAttribute("user_info_form", ui)
-            model.addAttribute("players", players)
+            model.addAttribute("game", game)
             return "userInfo"
         }
-        model.addAttribute("game_code_form", GameCode())
+        model.addAttribute("game_code_form", GameCodeForm())
         return "landing"
     }
 
     @RequestMapping(value = "/userInfo", method = arrayOf(RequestMethod.POST))
-    fun enterUserInfo(model : Model, @ModelAttribute("user_info_form") userInfo : UserInfo ) : String {
-        val players = gamesMap[userInfo.gameCode]
-        if (players != null) {
-            players.add(userInfo)
+    fun enterUserInfo(model : Model, @ModelAttribute("user_info_form") userInfoForm : UserInfoForm) : String {
+        val game = gameRepository.fetchGame(userInfoForm.gameCode)
+        if (game != null) {
+            val userInfo = UserInfo(userInfoForm.userName)
+            game.players.add(userInfo)
+            gameRepository.save(game)
             model.addAttribute("user_info", userInfo)
-            model.addAttribute("players", players)
+            model.addAttribute("game", game)
             return "lobby"
         }
-        model.addAttribute("game_code_form", GameCode())
+        model.addAttribute("game_code_form", GameCodeForm())
         return "landing"
     }
-
-    fun generateGameCode() : String {
-        val rand = Random()
-        var ret = ""
-        for (x in 1..GAME_CODE_LEN) {
-            ret += ALPHA_NUM[rand.nextInt(ALPHA_NUM.length)]
-        }
-        return ret
-    }
-}
-
-class GameCode {
-    var code: String = ""
-    init {}
-}
-
-class UserInfo {
-    var gameCode = ""
-    var userName = ""
-    init {}
 }
 

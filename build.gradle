@@ -25,6 +25,9 @@ targetCompatibility = 1.8
 
 repositories {
 	mavenCentral()
+    maven {
+        url "http://repository.jetbrains.com/all"
+    }
 }
 
 
@@ -35,6 +38,7 @@ dependencies {
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
 	testCompile('com.codeborne:selenide:3.4')
+    testCompile 'org.jetbrains.spek:spek:0.1.195'
 }
 
 
