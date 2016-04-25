@@ -2,29 +2,40 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 <head>
-    <script src="poll.js" th:attr="data-user_type=${user_info.userType}"></script>
+    <script type='text/javascript' src='knockout-3.4.0.js'></script>
+    <script type='text/javascript' src='knockout.viewmodel.min.js'></script>
+    <script src="poll.js" th:attr="data-user_type=${user_info.userType}, data-game_json=${game_json}"></script>
     <meta charset="UTF-8"/>
     <title>Lobby</title>
 </head>
 <body>
 Welcome <span id="user_name" th:text="${user_info.userName}">!</span>
 <p>Your Game Code is:</p>
-<p id="game_code" th:text="${game.gameCode}">!</p>
+<p id="game_code" data-bind="text: gameCode">!</p>
 
+<!-- ko if: unstarted -->
 <button id="start_button" onclick="startGame()">Start Game</button>
-<h3 id="game_status"></h3>
-<div id="ready_prompt" style="display:none">
-    Ready?
-    <form>
-        <input type="button" value="Yes" onclick="setReady()"/>
-        <input type="button" value="No" onclick="leaveGame()"/>
-    </form>
+<!-- /ko -->
+
+<!-- ko if: starting -->
+    <h3 id="game_starting_msg" data-bind="text: startingMsg"></h3>
+
+    <!-- ko ifnot: ready -->
+    <div id="ready_prompt">
+        Ready?
+        <form>
+            <input type="button" value="Yes" onclick="setReady()"/>
+            <input type="button" value="No" onclick="leaveGame()"/>
+        </form>
+    </div>
+    <!-- /ko -->
+<!-- /ko -->
+
+<div>
+    Current players:
+    <ul data-bind="foreach: players">
+        <li data-bind="text: userName"></li>
+    </ul>
 </div>
-
-Current players:
-<ul th:each="player : ${game.players}">
-    <li th:text="${player.userName}"></li>
-</ul>
-
 </body>
 </html>

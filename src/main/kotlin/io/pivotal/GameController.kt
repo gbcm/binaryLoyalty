@@ -11,9 +11,14 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
+import com.fasterxml.jackson.databind.ObjectMapper
 
 @Controller
 class GameController @Autowired constructor(val gameRepository: GameRepository) {
+
+    companion object {
+        val objectMapper = ObjectMapper()
+    }
 
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(model : Model) : String {
@@ -28,7 +33,7 @@ class GameController @Autowired constructor(val gameRepository: GameRepository) 
         var game = Game()
         gameRepository.save(game)
         model.addAttribute("user_info", game.players.get(0))
-        model.addAttribute("game", game)
+        model.addAttribute("game_json", objectMapper.writeValueAsString(game))
 
         return "lobby"
     }
@@ -41,6 +46,8 @@ class GameController @Autowired constructor(val gameRepository: GameRepository) 
             ui.gameCode = game.gameCode
             model.addAttribute("user_info_form", ui)
             model.addAttribute("game", game)
+            model.addAttribute("game_json", objectMapper.writeValueAsString(game))
+
             return "userInfo"
         }
         model.addAttribute("game_code_form", GameCodeForm())
@@ -56,6 +63,7 @@ class GameController @Autowired constructor(val gameRepository: GameRepository) 
             gameRepository.save(game)
             model.addAttribute("user_info", userInfo)
             model.addAttribute("game", game)
+            model.addAttribute("game_json", objectMapper.writeValueAsString(game))
             return "lobby"
         }
         model.addAttribute("game_code_form", GameCodeForm())

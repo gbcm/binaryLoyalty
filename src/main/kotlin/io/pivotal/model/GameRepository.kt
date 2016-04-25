@@ -10,7 +10,7 @@ class GameRepository {
     val gamesMap = hashMapOf<String, Game>()
 
     fun fetchGame(gameCode : String) : Game {
-        return gamesMap[gameCode] ?: throw GameNotFoundException
+        return gamesMap[gameCode] ?: throw GameNotFoundException("gameCode '$gameCode' not found");
     }
 
     fun save(game: Game) {
@@ -18,6 +18,7 @@ class GameRepository {
     }
 }
 
-object GameNotFoundException : Throwable() {
-
+class GameNotFoundException : Throwable {
+    constructor(message : String) : super(message){
+    }
 }
